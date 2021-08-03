@@ -170,6 +170,14 @@ public class UBottomSheetCoordinator: NSObject {
         }
     }
     
+    public func expand(animated: Bool) {
+        setToNearest(minSheetPosition!, animated: animated)
+    }
+    
+    public func collapse(animated:Bool) {
+        setToNearest(maxSheetPosition!, animated: true)
+    }
+    
     /**
      Frame of the sheet when added.
      */
@@ -340,7 +348,9 @@ public class UBottomSheetCoordinator: NSObject {
         let navBarPan = UIPanGestureRecognizer(target: self, action:  #selector(handleViewPan(_:)))
         pan.delegate = self
         navBarPan.delegate = self
-        item.navigationController?.navigationBar.addGestureRecognizer(navBarPan)
+        if let navigationController = item.navigationController {
+            navigationController.navigationBar.addGestureRecognizer(navBarPan)
+        }
 //        item.draggableView()?.gestureRecognizers?.forEach({ (recognizer) in
 //            print("log: ", recognizer.classForCoder, " ", recognizer.isEnabled)
 //            let clazz = recognizer.classForCoder.description()
@@ -353,6 +363,17 @@ public class UBottomSheetCoordinator: NSObject {
         draggables.append(item)
     }
     
+    public func startTracking<T: DraggableItem>(item: T, tapView:UIView) {
+        guard !isTracking(item: item) else {
+            return
+        }
+        
+        let navBarTap = UITapGestureRecognizer(target: self, action:  #selector(handleViewPan(_:)))
+        navBarTap.delegate = self
+        tapView.addGestureRecognizer(navBarTap)
+        startTracking(item: item)
+    }
+    
     func stopTracking<T: DraggableItem>(item: T){
         draggables.removeAll { (vc) -> Bool in
             vc == item
@@ -363,8 +384,18 @@ public class UBottomSheetCoordinator: NSObject {
      Container view pan gesture event
      - parameter recognizer: view pan gesture  object.
     */
-    @objc private func handleViewPan(_ recognizer: UIPanGestureRecognizer) {
-        handlePan(recognizer)
+    @objc private func handleViewPan(_ recognizer: UIGestureRecognizer) {
+        if let panGestureRecognizer = recognizer as? UIPanGestureRecognizer {
+            handlePan(panGestureRecognizer)
+        } else if let tapGestureRecognizer = recognizer as? UITapGestureRecognizer {
+            guard let container = self.container else { return }
+            let y = dataSource.sheetPositions(availableHeight).nearest(to: container.frame.origin.y)
+            if y == minSheetPosition {
+                collapse(animated: true)
+            } else {
+                expand(animated: true)
+            }
+        }
     }
 
     /**

@@ -11,9 +11,10 @@ import UBottomSheet
 
 class ListViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    
+    var allowTapView:Bool?
     var sheetCoordinator: UBottomSheetCoordinator?
-
+    @IBOutlet weak var tapView: UIView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         if #available(iOS 11.0, *) {
@@ -28,7 +29,7 @@ class ListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        sheetCoordinator?.startTracking(item: self)
+        sheetCoordinator?.startTracking(item: self, tapView:tapView)
     }
 }
 
@@ -63,6 +64,12 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource{
         case 1:
             title = "Click To Add Sheet Child"
             subtitle = "Row \(indexPath.row) (Move all sheets together)"
+        case 2:
+            title = "Click To expand"
+            subtitle = "Row \(indexPath.row)"
+        case 3:
+            title = "Click To collapse"
+            subtitle = "Row \(indexPath.row)"
         default:
             title = "No Action"
             subtitle = "Row \(indexPath.row)"
@@ -82,6 +89,10 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource{
         case 1:
             vc.sheetCoordinator = sheetCoordinator
             sheetCoordinator?.addSheetChild(vc)
+        case 2:
+            self.sheetCoordinator?.expand(animated: true)
+        case 3:
+            self.sheetCoordinator?.collapse(animated: true)
         default:
             title = "No Action"
         }

@@ -26,6 +26,7 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         items.append(("Navigation In Sheet", "Sheet View Controllers are embedded in a UINavigationController"))
         items.append(("Pull To Dismiss", "Dissmiss the sheet by pulling down"))
         items.append(("Multiple Sheet Positions", "Implement UBottomSheetCoordinatorDataSource to override default implementation"))
+        items.append(("Tap to open", "Tap to specific view to expand or collapse bottom sheet"))
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -46,6 +47,7 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         case 1: navigationDemoAction(items[indexPath.row])
         case 2: pullToDismissDemoAction(items[indexPath.row])
         case 3: customDataSourceDemoAction(items[indexPath.row])
+        case 4: tapToOpen(items[indexPath.row])
         default: break
         }
     }
@@ -79,4 +81,10 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
+    func tapToOpen(_ item: MainItem){
+        let vc = SimpleViewController()
+        vc.sheetVC = ListViewController()
+        vc.dataSource = MyDataSource()
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
 }
