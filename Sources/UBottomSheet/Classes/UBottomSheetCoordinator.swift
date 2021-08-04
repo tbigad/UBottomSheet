@@ -174,6 +174,18 @@ public class UBottomSheetCoordinator: NSObject {
         setToNearest(maxSheetPosition!, animated: true)
     }
     
+    public func jumpAnimate() {
+        let oldFrame = container!.frame
+        let position = oldFrame.origin.y - 20
+        let height = max(availableHeight - minSheetPosition!, availableHeight - position)
+        let frame = CGRect(x: 0, y: position, width: oldFrame.width, height: height)
+        UIView.animate(withDuration: 1, delay: 0, options: [.autoreverse, .curveEaseOut], animations: {
+            self.container!.frame = frame
+        }, completion: {_ in
+            self.container!.frame = oldFrame
+        })
+    }
+    
     /**
      Frame of the sheet when added.
      */
@@ -382,14 +394,21 @@ public class UBottomSheetCoordinator: NSObject {
     */
     @objc private func handleViewPan(_ recognizer: UIGestureRecognizer) {
         if let panGestureRecognizer = recognizer as? UIPanGestureRecognizer {
-            handlePan(panGestureRecognizer)
+            let itShouldHandled = delegate?.canHandlePanEvent() ?? true
+            if itShouldHandled {
+                handlePan(panGestureRecognizer)
+            }
         } else if let tapGestureRecognizer = recognizer as? UITapGestureRecognizer {
-            guard let container = self.container else { return }
+            let itShouldHandled = delegate?.canHandleTapEvent() ?? true
+            if itShouldHandled {
+                guard let container = self.container else { return }
             let y = dataSource.sheetPositions(availableHeight).nearest(to: container.frame.origin.y)
             if y == minSheetPosition {
                 collapse(animated: true)
             } else {
                 expand(animated: true)
+            }
+                
             }
         }
     }
@@ -402,7 +421,10 @@ public class UBottomSheetCoordinator: NSObject {
         guard let scrollView = recognizer.view as? UIScrollView else {
             return
         }
-        handlePan(recognizer, scrollView: scrollView)
+        let itShouldHandled = delegate?.canHandlePanEvent() ?? true
+        if itShouldHandled {
+            handlePan(recognizer, scrollView: scrollView)
+        }
     }
     
     /// Holds last scroll view content offset to stop scrolling while driving the view
