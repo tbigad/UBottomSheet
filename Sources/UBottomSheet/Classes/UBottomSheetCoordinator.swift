@@ -17,15 +17,14 @@ public enum SheetTranslationState {
 public class UBottomSheetCoordinator: NSObject {
     public weak var parent: UIViewController!
     private var container: UIView?
-    public weak var dataSource: UBottomSheetCoordinatorDataSource! {
-        didSet {
-            minSheetPosition = dataSource.sheetPositions(availableHeight).min()
-            maxSheetPosition = dataSource.sheetPositions(availableHeight).max()
-        }
-    }
+    public weak var dataSource: UBottomSheetCoordinatorDataSource!
     public weak var delegate: UBottomSheetCoordinatorDelegate?
-    private var minSheetPosition: CGFloat?
-    private var maxSheetPosition: CGFloat?
+    private var minSheetPosition: CGFloat? {
+        return dataSource.sheetPositions(availableHeight).min()
+    }
+    private var maxSheetPosition: CGFloat? {
+        return dataSource.sheetPositions(availableHeight).max()
+    }
     ///View controllers which conform to Draggable protocol
     public var draggables: [DraggableItem] = []
     ///Drop shadow view behind container.
@@ -69,9 +68,6 @@ public class UBottomSheetCoordinator: NSObject {
         self.parent = parent
         self.dataSource = parent
         self.delegate = delegate
-        
-        minSheetPosition = dataSource.sheetPositions(availableHeight).min()
-        maxSheetPosition = dataSource.sheetPositions(availableHeight).max()
     }
     
     /**
